@@ -1,21 +1,33 @@
-## Distance-IoU Loss: Faster and Better Learning for Bounding Box Regression 
+<img src="CIoU.png" width="800px"/>
 
-[[arxiv](https://arxiv.org/abs/1911.08287)] [[pdf](https://arxiv.org/pdf/1911.08287.pdf)]
+## Complete-IoU Loss and Cluster-NMS for improving Object Detection and Instance Segmentation. 
+#### New released! https://github.com/Zzh-tju/CIoU
 
-## DIoU-Darknet
-
-YOLOv3 with DIoU and CIoU losses implemented in Darknet
-
-If you use this work, please consider citing:
+This is the code for our papers:
+ - [Distance-IoU Loss: Faster and Better Learning for Bounding Box Regression](https://arxiv.org/abs/1911.08287)
+ - [Enhancing Geometric Factors into Model Learning and Inference for Object Detection and Instance Segmentation](https://arxiv.org/abs/2005.03572)
 
 ```
-@inproceedings{zheng2020distance,
+@Inproceedings{zheng2020distance,
   author    = {Zhaohui Zheng, Ping Wang, Wei Liu, Jinze Li, Rongguang Ye, Dongwei Ren},
   title     = {Distance-IoU Loss: Faster and Better Learning for Bounding Box Regression},
   booktitle = {The AAAI Conference on Artificial Intelligence (AAAI)},
    year      = {2020},
 }
+
+@Article{zheng2020ciou,
+  author= {Zhaohui Zheng, Ping Wang, Dongwei Ren, Wei Liu, Rongguang Ye, Qinghua Hu, Wangmeng Zuo},
+  title={Enhancing Geometric Factors in Model Learning and Inference for Object Detection and Instance Segmentation},
+  journal={arXiv:2005.03572},
+  year={2020}
+}
 ```
+
+## Distance-IoU Loss into other SOTA detection methods can be found [here](https://github.com/Zzh-tju/DIoU). 
+
+## DIoU-Darknet
+
+YOLOv3 with DIoU and CIoU losses implemented in Darknet
 
 ## Modifications in this repository
 
@@ -168,6 +180,22 @@ Now, yourpath/DIoU-darknet/ will have several txt file like this:
 
 Training set contains 16551 images, and validation set contains 4952 images.
 
+## Training YOLO on COCO
+
+To train YOLO you will need all of the COCO data and labels. The script scripts/get_coco_dataset.sh will do this for you.
+```
+cp scripts/get_coco_dataset.sh data
+cd data
+bash get_coco_dataset.sh
+python scripts/coco_label.py
+```
+
+Train The Model
+Now we can train! Run the command:
+```
+./darknet detector train cfg/coco-ciou.data cfg/coco-ciou.cfg darknet53.conv.74 -gpus 0,1,2,3
+```
+
 ## Evaluation
 
 ### VOC
@@ -181,16 +209,52 @@ When you finish the training, you can validate it:
 ```
 ./darknet detector valid voc-diou.data voc-diou.cfg backup/your_weight_path/your_weight.weights
 ```
-There will be 20 txt files generated in results/.
+There will be 20 txt files generated in /yourpath/DIoU-Darknet/results/.
+<img src="eval/class_results.png" width="600px"/>
 
 Then for validation, I mainly use three files: compute_mAP.py, voc_eval.py, map.py
 
 You can put the three in the same directory.
 
-After that I use compute_mAP.py to compute mAP. This will create 10 txt files, each of them contains mAP for 20 classes. You can open voc_eval.py to modify the path at the end of the file. (See ☆☆☆☆☆)
+Firstly,
+```
+python eval/compute_mAP.py
+```
+This will create 10 txt files, each of them contains mAP for 20 classes. 
+<img src="eval/eval.png" width="600px"/>
 
-Finally, open map.py. to modify to your path. And run map.py. This will print the AP in the terminal and calculate the mAP for different threshhold, e.g, AP50, AP75.
+You can open eval/voc_eval.py to modify the path at the end of the file. (See ☆☆☆☆☆ )
+
+Secondly, open `eval/map.py` to modify to your path.
+```
+python eval/map.py
+```
+This will print the AP in the terminal and calculate the mAP for different threshhold, e.g, AP50, AP75.
 AP50, AP55, ..., AP95 will appear at the last line of 10 txt files generated above.
+```
+aeroplane 	0.859953927601302
+bicycle 	0.8570948725214653
+bird 		0.7815241730933422
+boat 		0.6885571683084716
+bottle 		0.6878002434239279
+bus 		0.8774114526435925
+car 		0.9124346504544593
+cat 		0.8962038854301146
+chair 		0.6142762879219088
+cow 		0.8346408862658632
+diningtable 	0.7162604144581127
+dog 		0.8688758188651542
+horse 		0.8948186206841635
+motorbike 	0.8704952288269674
+person 		0.8628876984931069
+pottedplant 	0.500699583013652
+sheep 		0.8041337922413851
+sofa 		0.7793190004011306
+train 		0.8627512497332716
+tvmonitor 	0.7799964431935789
+
+0.797507
+```
 
 ### COCO
 
